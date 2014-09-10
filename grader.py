@@ -1,5 +1,7 @@
 import getpass
 import urllib2
+import re
+import difflib
 from github import Github
 
 
@@ -22,15 +24,64 @@ class Homework:
 
 
 class Grader:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.github_instance = None
         self.correct_answer = ''
         self.homeworks = []
 
     def login(self, username, password):
+        print ">>> Hello " + username +"! " + "I am " + self.name + "!"
         self.github_instance = Github(username, password)
 
+    def md_to_ans_form(self, md):
+        ans_form = {}
+        head_contents = None
+        main_contents = ""
+        head_cnt = 0
+        for index, line in enumerate(md.readlines()):
+            if (line.startswith('#')) and (head_contents is None):
+                # new head is started
+                head_contents = line
+            elif (line.startswith('#')) and (head_contents is not None):
+                # make new dict item
+                ans_form[head_cnt] = {"head_contents": head_contents,
+                                      "main_contents": main_contents}
+                head_contents = line
+                main_contents = ""
+                head_cnt += 1
+            else:
+                main_contents += line
+        ans_form[head_cnt] = {"head_contents": head_contents,
+                              "main_contents": main_contents}
+        return ans_form
+
+    def fill_header_properties(self, raw_ans_form, def_point=5):
+        for index, item in enumerate(raw_ans_form):
+            is_question = False
+            point = 0
+            main_contents = raw_ans_form[item]["main_contents"]
+            if (main_contents.strip() is not '') and (int(item) > 1):
+                is_question = True
+            raw_ans_form[item].update({"is_question": is_question})
+
+            if is_question:
+                head_contents = raw_ans_form[item]["head_contents"]
+                regex = r"\(([0-9]{1,2}) points\)"
+                rx = re.compile(regex)
+                result = rx.search(head_contents)
+                if (result is None):
+                    point = def_point
+                else:
+                    point = result.group(1)
+            else:
+                point = 0
+            raw_ans_form[item].update({"is_question": is_question,
+                                       "point": point})
+        return raw_ans_form
+
     def retrieve_correct_answer(self, user, project, filename="README.md"):
+        print ">>> Retrieving correct answer"
         branch = "master"
         url = "https://raw.githubusercontent.com/" + \
               "/" + user + \
@@ -38,27 +89,11 @@ class Grader:
               "/" + branch + \
               "/" + filename
         response = urllib2.urlopen(url)
-        self.correct_answer = self.md_to_list(response)
-
-    def md_to_list(self, md):
-        raw_answer = ''
-        for line in md.readlines():
-            if line.startswith('#'):
-                raw_answer += 'm'
-            elif not line.strip():
-                raw_answer += 'b'
-            else:
-                raw_answer += 'a'
-        raw_answer = raw_answer.split("m")
-        raw_answer.pop(0)
-        for idx, i in enumerate(raw_answer):
-            raw_answer[idx] = i.replace('b', '')
-            if raw_answer[idx] is not '':
-                raw_answer[idx] = 'a'
-
-        return raw_answer
+        raw_ans_form = self.md_to_ans_form(response)
+        self.correct_answer = self.fill_header_properties(raw_ans_form)
 
     def retrieve_homeworks(self, user, project):
+        print ">>> Retrieving homeworks"
         pulls = self.github_instance.get_user(user).get_repo(project).get_pulls()
         for pull in pulls:
             hw = Homework(pull.user.email, pull.user.login, project,
@@ -71,23 +106,36 @@ class Grader:
                 if file.raw_url.endswith('md'):
                     homework.answer_urls.append(file.raw_url)
                     response = urllib2.urlopen(file.raw_url)
-                    homework.answer_sheets.append(self.md_to_list(response))
+                    homework.answer_sheets.append(self.md_to_ans_form(response))
 
-    def grading(self, total_scores=100, point_per_question=5):
+    def _similar(self, text_a, text_b, trasholder=0.991):
+        text_a = text_a.strip().lower()
+        text_b = text_b.strip().lower()
+        seq = difflib.SequenceMatcher(None, text_a, text_b)
+        return seq.ratio() > trasholder
+
+    def _check_answers(self, homework):
+        score = 0
+        for index, question in enumerate(self.correct_answer):
+            if self.correct_answer[question]["is_question"] is True:
+                cor_ans = self.correct_answer[question]["main_contents"]
+                home_ans = homework[index]["main_contents"]
+                if self._similar(cor_ans, home_ans) is True:
+                    continue
+                else:
+                    score += int(self.correct_answer[question]["point"])
+
+        return score
+
+    def grading(self):
+        print ">>> Grading"
         for homework in self.homeworks:
-            for answer_sheet in homework.answer_sheets:
-                mark = []
-                for index in range(len(self.correct_answer)):
-                    if self.correct_answer[index] == '':
-                        mark.append('')
-                    elif self.correct_answer[index] == answer_sheet[index]:
-                        mark.append(True)
-                    else:
-                        mark.append(False)
-                score = total_scores - mark.count(False)*point_per_question
+            print "Hey ", homework.login + "!"
+            for answer in homework.answer_sheets:
+                score = self._check_answers(answer)
                 homework.scores.append(score)
-            homework.ambiguity = self.check_ambiguity(homework)
             homework.set_final_scores()
+            homework.ambiguity = self.check_ambiguity(homework)
 
     def check_ambiguity(self, homework):
         ambiguity = False
@@ -103,10 +151,8 @@ class Grader:
     def check_deadline(self, deadline):
         pass
 
-    def check_answer(self):
-        pass
-
     def report(self):
+        print ">>> Reporting"
         for homework in self.homeworks:
             print homework.login, homework.final_score, homework.ambiguity
 
@@ -115,15 +161,20 @@ if __name__ == "__main__":
     """
     Specifically speaking, this grader can be grading on
     CSCI-4830-002-2014
+
+    Example)
+    project = "challenge-week-1"
     """
 
-    g = Grader()
+    grace = Grader("Grace")
+
     username = raw_input("Enter github ID: ")
     password = getpass.getpass("Enter github password: ")
-    g.login(username, password)
-    user = raw_input("Enter github user: ")
+    user = "CSCI-4830-002-2014"
     project = raw_input("Enter github project: ")
-    g.retrieve_correct_answer(user, project)
-    g.retrieve_homeworks(user, project)
-    g.grading()
-    g.report()
+
+    grace.login(username, password)
+    grace.retrieve_correct_answer(user, project)
+    grace.retrieve_homeworks(user, project)
+    grace.grading()
+    grace.report()
