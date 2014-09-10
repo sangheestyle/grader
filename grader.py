@@ -112,6 +112,11 @@ class Grader:
 
 
 if __name__ == "__main__":
+    """
+    Specifically speaking, this grader can be grading on
+    CSCI-4830-002-2014
+    """
+
     g = Grader()
     username = raw_input("Enter github ID: ")
     password = getpass.getpass("Enter github password: ")
