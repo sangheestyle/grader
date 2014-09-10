@@ -14,11 +14,10 @@ You may need to do following to get the result.
 $ python grader.py 
 Enter github ID: sangheestyle
 Enter github password: 
-Enter github user: CSCI-4830-002-2014 
 Enter github project: challenge-week-1
 ```
 
-And, you will get the result.
+And, you will get the result like the following..
 ```
 JoshFerge 100 False
 ianks 100 False
