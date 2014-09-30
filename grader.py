@@ -62,6 +62,8 @@ class Grader:
             if (main_contents.strip() is not '') \
                 and ("Name" not in head_contents) \
                 and ("many points have you" not in head_contents) \
+                and ("Show and tell" not in head_contents) \
+                and ("What is the most difficult part" not in head_contents) \
                 and ("many hours have you spent" not in head_contents):
                     is_question = True
 
@@ -136,6 +138,8 @@ class Grader:
         score = 0
         for index, question in enumerate(self.correct_answer):
             if self.correct_answer[question]["is_question"] is True:
+                # for debugging
+                # print self.correct_answer[question]["head_contents"]
                 cor_ans = self.correct_answer[question]["main_contents"]
                 home_ans = homework[index]["main_contents"]
                 if self._similar(cor_ans, home_ans) is True:
@@ -149,11 +153,17 @@ class Grader:
         print ">>> Grading"
         for homework in self.homeworks:
             print "Hey ", homework.name + "!"
+
             for answer in homework.answer_sheets:
-                score = self._check_answers(answer)
-                homework.scores.append(score)
+                try:
+                    score = self._check_answers(answer)
+                    homework.scores.append(score)
+                except:
+                    print ">>> Some problems on ", homework.name +"!"
+
             homework.set_final_scores()
             homework.ambiguity = self.check_ambiguity(homework)
+
 
     def check_ambiguity(self, homework):
         ambiguity = False
