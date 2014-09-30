@@ -17,9 +17,14 @@ class Homework:
         self.final_score = 0
 
     def set_final_scores(self):
-        self.final_score = max(self.scores)
+        try:
+            self.final_score = max(self.scores)
+        except:
+            self.final_score = 0
+            self.ambiguity = True
 
     def set_name(self):
+        print "===", self.name
         names = []
         regex = r"^#{1,3} [Nn]ame$"
         rx = re.compile(regex)
@@ -30,11 +35,15 @@ class Homework:
                 if result is not None:
                     names.append(answer_sheet[index]['main_contents'])
 
-        self.name = max(names)
+        try:
+            self.name = max(names)
+        except:
+            self.name = self.login
 
     def set_expected_score(self):
         scores = []
-        regex_score = r"^([0-9]{1,3})/[0-9]{1,3}.*"
+        #regex_score = r"^([0-9]{1,3})/[0-9]{1,3}.*"
+        regex_score = r"^([0-9]{1,3})"
         rx_score = re.compile(regex_score)
         regex_point_sentence = r"^#{1,3} How many points .*"
         rx_point_sentence = re.compile(regex_point_sentence)
@@ -42,6 +51,7 @@ class Homework:
         for answer_sheet in self.answer_sheets:
             for index in range(len(answer_sheet)):
                 head_contents = answer_sheet[index]['head_contents']
+                print answer_sheet[index]['head_contents']
 
                 if rx_point_sentence.search(head_contents) is not None:
                     result = rx_score.search(answer_sheet[index]['main_contents'])
