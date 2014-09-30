@@ -96,7 +96,6 @@ class Grader:
                           pull.created_at,
                           pull.get_commits(),
                           pull.get_files())
-            # ISSUE: some doesn't have pull.user.email, pull.user.name
             self.homeworks.append(hw)
 
         for homework in self.homeworks:
@@ -106,6 +105,9 @@ class Grader:
                     response = urllib2.urlopen(file.raw_url)
                     homework.answer_sheets.append(
                             self.md_to_ans_form(response))
+
+            homework.set_name()
+            homework.set_expected_score()
 
     def _similar(self, text_a, text_b, trasholder=0.991):
         text_a = text_a.strip().lower()
@@ -130,7 +132,7 @@ class Grader:
     def grading(self):
         print ">>> Grading"
         for homework in self.homeworks:
-            print "Hey ", homework.login + "!"
+            print "Hey ", homework.name + "!"
             for answer in homework.answer_sheets:
                 score = self._check_answers(answer)
                 homework.scores.append(score)
@@ -154,7 +156,7 @@ class Grader:
     def report(self):
         print ">>> Reporting"
         for homework in self.homeworks:
-            print homework.login, homework.final_score, homework.ambiguity
+            print homework.name, homework.final_score, homework.ambiguity
 
 
 if __name__ == "__main__":
