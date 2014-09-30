@@ -43,7 +43,7 @@ class Grader:
 
         return ans_form
 
-    def fill_header_properties(self, raw_ans_form, def_point=5):
+    def parse_answer(self, raw_ans_form, def_point=5):
         for index, item in enumerate(raw_ans_form):
             is_question = False
             point = 0
@@ -51,6 +51,7 @@ class Grader:
 
             if (main_contents.strip() is not '') and (int(item) > 1):
                 is_question = True
+
             raw_ans_form[item].update({"is_question": is_question})
 
             if is_question:
@@ -80,7 +81,7 @@ class Grader:
               "/" + filename
         response = urllib2.urlopen(url)
         raw_ans_form = self.md_to_ans_form(response)
-        self.correct_answer = self.fill_header_properties(raw_ans_form)
+        self.correct_answer = self.parse_answer(raw_ans_form)
 
     def retrieve_homeworks(self, user, project):
         print ">>> Retrieving homeworks"
