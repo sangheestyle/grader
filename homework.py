@@ -1,5 +1,6 @@
 class Homework:
     def __init__(self, email, login, title, submitted_at, commits, files):
+        self.name = None
         self.email = email
         self.login = login
         self.title = title
@@ -14,3 +15,12 @@ class Homework:
 
     def set_final_scores(self):
         self.final_score = max(self.scores)
+
+    def set_name(self):
+        names = []
+        for answer_sheet in self.answer_sheets:
+            for index in range(len(answer_sheet)):
+                if answer_sheet[index]['head_contents'] == '# Name':
+                    names.append(answer_sheet[index]['main_contents'])
+
+        self.name = max(names)
