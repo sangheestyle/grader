@@ -155,8 +155,12 @@ class Grader:
 
     def report(self):
         print ">>> Reporting"
+        print "{0:20} {1:6} {2:6} {3:}".format(\
+                "name", "score", "expect", "ambiguous")
         for homework in self.homeworks:
-            print homework.name, homework.final_score, homework.ambiguity
+            print "{0:20} {1:6d} {2:6d} {3:}".format(\
+                  homework.name, homework.final_score,
+                  homework.expected_score, homework.ambiguity)
 
 
 if __name__ == "__main__":
