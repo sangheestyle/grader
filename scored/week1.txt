@@ -1,0 +1,19 @@
+name                 score  expect ambiguous
+Daniel Nolan            100    100 False
+Ryan Roden              100    100 False
+Jake White               15     15 False
+Joshua Ferge            100    100 False
+Ian Ker-Seymer          100    100 False
+Michael Aaron           100    100 False
+Austin Wood             100    100 False
+Manpreet Singh          100    100 False
+Logan Bates             100    100 False
+Peyman Mortazavi        100      0 False
+Irfan Nadiadi           100    100 False
+Michael Fyk             100    100 False
+Dawson Botsford         100    100 False
+Jake Charland           100    100 False
+Brian Newsom            100    100 False
+Alexander Tsankov        95     95 False
+Chris Wittenberg        100    100 False
+Justin McBride          100    100 False

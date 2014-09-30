@@ -1,0 +1,22 @@
+name                 score  expect ambiguous
+Nikita Voskoboynik       12      0 False
+Daniel Nolan            100    100 False
+Austin Wood             100    100 False
+Michael Aaron           100    100 False
+Logan Bates             100    100 False
+Jake White               28     28 False
+Alexia Newgord          100     97 False
+Joshua Ferge            100    100 False
+Chris Wittenberg        100     92 True
+Dawson Botsford         100    100 False
+Ian Ker-Seymer          100    100 False
+Irfan Nadiadi           100    100 False
+Marc Simpson             96     60 False
+Adrian Chen             100    100 False
+Jake Charland            96    100 False
+Michael Fyk             100     99 False
+Peyman Mortazavi        100    100 False
+Alex Tsankov            100    100 False
+Brian Newsom            100    100 False
+Niklas Fejes            100    100 False
+Justin McBride          100    100 False
