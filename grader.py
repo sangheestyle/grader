@@ -7,6 +7,7 @@ from homework import Homework
 
 
 class Grader:
+
     def __init__(self, name):
         self.name = name
         self.github_instance = None
@@ -22,6 +23,7 @@ class Grader:
         head_contents = None
         main_contents = ""
         head_cnt = 0
+
         for index, line in enumerate(md.readlines()):
             if (line.startswith('#')) and (head_contents is None):
                 # new head is started
@@ -35,8 +37,10 @@ class Grader:
                 head_cnt += 1
             else:
                 main_contents += line
+
         ans_form[head_cnt] = {"head_contents": head_contents,
                               "main_contents": main_contents}
+
         return ans_form
 
     def fill_header_properties(self, raw_ans_form, def_point=5):
@@ -44,6 +48,7 @@ class Grader:
             is_question = False
             point = 0
             main_contents = raw_ans_form[item]["main_contents"]
+
             if (main_contents.strip() is not '') and (int(item) > 1):
                 is_question = True
             raw_ans_form[item].update({"is_question": is_question})
@@ -59,8 +64,10 @@ class Grader:
                     point = result.group(1)
             else:
                 point = 0
+
             raw_ans_form[item].update({"is_question": is_question,
                                        "point": point})
+
         return raw_ans_form
 
     def retrieve_correct_answer(self, user, project, filename="README.md"):
@@ -77,10 +84,16 @@ class Grader:
 
     def retrieve_homeworks(self, user, project):
         print ">>> Retrieving homeworks"
-        pulls = self.github_instance.get_user(user).get_repo(project).get_pulls()
+        pulls = self.github_instance.get_user(user).\
+                get_repo(project).get_pulls()
+
         for pull in pulls:
-            hw = Homework(pull.user.email, pull.user.login, project,
-                          pull.created_at, pull.get_commits(), pull.get_files())
+            hw = Homework(pull.user.email,
+                          pull.user.login,
+                          project,
+                          pull.created_at,
+                          pull.get_commits(),
+                          pull.get_files())
             # ISSUE: some doesn't have pull.user.email, pull.user.name
             self.homeworks.append(hw)
 
@@ -89,12 +102,14 @@ class Grader:
                 if file.raw_url.endswith('md'):
                     homework.answer_urls.append(file.raw_url)
                     response = urllib2.urlopen(file.raw_url)
-                    homework.answer_sheets.append(self.md_to_ans_form(response))
+                    homework.answer_sheets.append(
+                            self.md_to_ans_form(response))
 
     def _similar(self, text_a, text_b, trasholder=0.991):
         text_a = text_a.strip().lower()
         text_b = text_b.strip().lower()
         seq = difflib.SequenceMatcher(None, text_a, text_b)
+
         return seq.ratio() > trasholder
 
     def _check_answers(self, homework):
