@@ -14,7 +14,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.hw.answer_sheets = [{0:{'main_contents': 'First Last',
                                      'head_contents': '# Name'},
                                   1:{'main_contents': "90/100(Make your",
-                                     'head_contents': '# How many points'},
+                                     'head_contents': '# How many points have'},
                                   2:{'main_contents': 'http://imgur.com/mC2uo',
                                      'head_contents': '## Checkpoint 1 (10 points)'}}
                                 ]

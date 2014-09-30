@@ -21,25 +21,30 @@ class Homework:
 
     def set_name(self):
         names = []
+        regex = r"^#{1,3} [Nn]ame$"
+        rx = re.compile(regex)
 
         for answer_sheet in self.answer_sheets:
             for index in range(len(answer_sheet)):
-                if answer_sheet[index]['head_contents'] == '# Name':
+                result = rx.search(answer_sheet[index]['head_contents'])
+                if result is not None:
                     names.append(answer_sheet[index]['main_contents'])
 
         self.name = max(names)
 
     def set_expected_score(self):
         scores = []
-        regex = r"^([0-9]{1,3})/[0-9]{1,3}.*"
-        rx = re.compile(regex)
+        regex_score = r"^([0-9]{1,3})/[0-9]{1,3}.*"
+        rx_score = re.compile(regex_score)
+        regex_point_sentence = r"^#{1,3} How many points .*"
+        rx_point_sentence = re.compile(regex_point_sentence)
 
         for answer_sheet in self.answer_sheets:
             for index in range(len(answer_sheet)):
                 head_contents = answer_sheet[index]['head_contents']
 
-                if head_contents.startswith('# How many points'):
-                    result = rx.search(answer_sheet[index]['main_contents'])
+                if rx_point_sentence.search(head_contents) is not None:
+                    result = rx_score.search(answer_sheet[index]['main_contents'])
 
                     if result is not None:
                         scores.append(int(result.group(1)))

@@ -36,6 +36,8 @@ class Grader:
                 head_contents = line
                 main_contents = ""
                 head_cnt += 1
+            elif (not line.startswith('#')) and (head_contents is None):
+                continue
             else:
                 main_contents += line
 
@@ -49,14 +51,23 @@ class Grader:
             is_question = False
             point = 0
             main_contents = raw_ans_form[item]["main_contents"]
+            head_contents = raw_ans_form[item]["head_contents"]
 
-            if (main_contents.strip() is not '') and (int(item) > 1):
-                is_question = True
+            """
+            Add cases which are not in each header string if it is question
+
+            e.g, if 'many hours have you spent' is in the head_contents
+                 it means the head is not question
+            """
+            if (main_contents.strip() is not '') \
+                and ("Name" not in head_contents) \
+                and ("many points have you" not in head_contents) \
+                and ("many hours have you spent" not in head_contents):
+                    is_question = True
 
             raw_ans_form[item].update({"is_question": is_question})
 
             if is_question:
-                head_contents = raw_ans_form[item]["head_contents"]
                 regex = r"\(([0-9]{1,2}) points\)"
                 rx = re.compile(regex)
                 result = rx.search(head_contents)
@@ -98,9 +109,14 @@ class Grader:
                           pull.get_files())
             self.homeworks.append(hw)
 
+        regex = r".*challenge-week-[0-9]{1,2}/raw/[0-9a-z]{40}/[^/]+?.md$"
+        rx = re.compile(regex)
+
         for homework in self.homeworks:
             for file in homework.files:
-                if file.raw_url.endswith('md'):
+                result = rx.search(file.raw_url)
+
+                if result is not None:
                     homework.answer_urls.append(file.raw_url)
                     response = urllib2.urlopen(file.raw_url)
                     homework.answer_sheets.append(
