@@ -187,26 +187,3 @@ class Grader:
             print "{0:20} {1:6d} {2:6d} {3:}".format(\
                   homework.name, homework.final_score,
                   homework.expected_score, homework.ambiguity)
-
-
-if __name__ == "__main__":
-    """
-    Specifically speaking, this grader can be grading on
-    CSCI-4830-002-2014
-
-    Example)
-    project = "challenge-week-1"
-    """
-
-    grace = Grader("Grace")
-
-    username = raw_input("Enter github ID: ")
-    password = getpass.getpass("Enter github password: ")
-    user = "CSCI-4830-002-2014"
-    project = raw_input("Enter github project: ")
-
-    grace.login(username, password)
-    grace.retrieve_correct_answer(user, project)
-    grace.retrieve_homeworks(user, project)
-    grace.grading()
-    grace.report()

@@ -1,5 +1,5 @@
 import unittest
-from homework import Homework
+from grace.homework import Homework
 
 class TestSequenceFunctions(unittest.TestCase):
     def setUp(self):
