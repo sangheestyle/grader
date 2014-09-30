@@ -25,6 +25,7 @@ class Grader:
         head_cnt = 0
 
         for index, line in enumerate(md.readlines()):
+            line = line.rstrip()
             if (line.startswith('#')) and (head_contents is None):
                 # new head is started
                 head_contents = line
