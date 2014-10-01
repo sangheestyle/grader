@@ -67,4 +67,16 @@ class Homework:
         """
         assume one url per one line
         """
-        return re.findall(r'(https?://\S+)', text)[0]
+        try:
+            url =re.findall(r'(https?://\S+)', text)[0]
+        except:
+            url = None
+
+        return url
+
+    def set_urls(self):
+        for idx, answer_sheet in enumerate(self.answer_sheets):
+            for index in range(len(answer_sheet)):
+                url = self._extract_url(answer_sheet[index]['main_contents'])
+                if url is not None:
+                    self.answer_sheets[idx][index].update({'url':url})

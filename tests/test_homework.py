@@ -32,6 +32,11 @@ class TestSequenceFunctions(unittest.TestCase):
         raw_text = "fad894y89 457437651er7" + url + " http:/d'39"
         self.assertEqual(self.hw._extract_url(raw_text), url)
 
+    def test_set_urls(self):
+        self.hw.set_urls()
+        self.assertEqual(self.hw.answer_sheets[0][2]['url'], \
+                         'http://imgur.com/mC2uo')
+
 
 if __name__=='__main__':
     unittest.main()
