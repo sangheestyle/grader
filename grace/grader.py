@@ -11,7 +11,7 @@ class Grader:
     def __init__(self, name):
         self.name = name
         self.github_instance = None
-        self.correct_answer = ''
+        self.correct_ans = ''
         self.homeworks = []
 
     def login(self, username, password):
@@ -20,51 +20,51 @@ class Grader:
 
     def md_to_ans_form(self, md):
         ans_form = {}
-        head_contents = None
-        main_contents = ""
+        head = None
+        main = ""
         head_cnt = 0
 
         for index, line in enumerate(md.readlines()):
             line = line.rstrip()
-            if (line.startswith('#')) and (head_contents is None):
+            if (line.startswith('#')) and (head is None):
                 # new head is started
-                head_contents = line
-            elif (line.startswith('#')) and (head_contents is not None):
+                head = line
+            elif (line.startswith('#')) and (head is not None):
                 # make new dict item
-                ans_form[head_cnt] = {"head_contents": head_contents,
-                                      "main_contents": main_contents}
-                head_contents = line
-                main_contents = ""
+                ans_form[head_cnt] = {"head": head,
+                                      "main": main}
+                head = line
+                main = ""
                 head_cnt += 1
-            elif (not line.startswith('#')) and (head_contents is None):
+            elif (not line.startswith('#')) and (head is None):
                 continue
             else:
-                main_contents += line
+                main += line
 
-        ans_form[head_cnt] = {"head_contents": head_contents,
-                              "main_contents": main_contents}
+        ans_form[head_cnt] = {"head": head,
+                              "main": main}
 
         return ans_form
 
-    def parse_answer(self, raw_ans_form, def_point=5):
+    def parse_ans(self, raw_ans_form, def_point=5):
         for index, item in enumerate(raw_ans_form):
             is_question = False
             point = 0
-            main_contents = raw_ans_form[item]["main_contents"]
-            head_contents = raw_ans_form[item]["head_contents"]
+            main = raw_ans_form[item]["main"]
+            head = raw_ans_form[item]["head"]
 
             """
             Add cases which are not in each header string if it is question
 
-            e.g, if 'many hours have you spent' is in the head_contents
+            e.g, if 'many hours have you spent' is in the head
                  it means the head is not question
             """
-            if (main_contents.strip() is not '') \
-                and ("Name" not in head_contents) \
-                and ("many points have you" not in head_contents) \
-                and ("Show and tell" not in head_contents) \
-                and ("What is the most difficult part" not in head_contents) \
-                and ("many hours have you spent" not in head_contents):
+            if (main.strip() is not '') \
+                and ("Name" not in head) \
+                and ("many points have you" not in head) \
+                and ("Show and tell" not in head) \
+                and ("What is the most difficult part" not in head) \
+                and ("many hours have you spent" not in head):
                     is_question = True
 
             raw_ans_form[item].update({"is_question": is_question})
@@ -72,7 +72,7 @@ class Grader:
             if is_question:
                 regex = r"\(([0-9]{1,2}) points\)"
                 rx = re.compile(regex)
-                result = rx.search(head_contents)
+                result = rx.search(head)
                 if (result is None):
                     point = def_point
                 else:
@@ -85,8 +85,8 @@ class Grader:
 
         return raw_ans_form
 
-    def retrieve_correct_answer(self, user, project, filename="README.md"):
-        print ">>> Retrieving correct answer"
+    def retrieve_correct_ans(self, user, project, filename="README.md"):
+        print ">>> Retrieving correct ans"
         branch = "master"
         url = "https://raw.githubusercontent.com/" + \
               "/" + user + \
@@ -95,7 +95,7 @@ class Grader:
               "/" + filename
         response = urllib2.urlopen(url)
         raw_ans_form = self.md_to_ans_form(response)
-        self.correct_answer = self.parse_answer(raw_ans_form)
+        self.correct_ans = self.parse_ans(raw_ans_form)
 
     def retrieve_homeworks(self, user, project):
         print ">>> Retrieving homeworks"
@@ -119,9 +119,9 @@ class Grader:
                 result = rx.search(file.raw_url)
 
                 if result is not None:
-                    homework.answer_urls.append(file.raw_url)
+                    homework.ans_urls.append(file.raw_url)
                     response = urllib2.urlopen(file.raw_url)
-                    homework.answer_sheets.append(
+                    homework.ans_sheets.append(
                             self.md_to_ans_form(response))
 
             homework.set_name()
@@ -134,18 +134,18 @@ class Grader:
 
         return seq.ratio() > trasholder
 
-    def _check_answers(self, homework):
+    def _check_anss(self, homework):
         score = 0
-        for index, question in enumerate(self.correct_answer):
-            if self.correct_answer[question]["is_question"] is True:
+        for index, question in enumerate(self.correct_ans):
+            if self.correct_ans[question]["is_question"] is True:
                 # for debugging
-                # print self.correct_answer[question]["head_contents"]
-                cor_ans = self.correct_answer[question]["main_contents"]
-                home_ans = homework[index]["main_contents"]
+                # print self.correct_ans[question]["head"]
+                cor_ans = self.correct_ans[question]["main"]
+                home_ans = homework[index]["main"]
                 if self._similar(cor_ans, home_ans) is True:
                     continue
                 else:
-                    score += int(self.correct_answer[question]["point"])
+                    score += int(self.correct_ans[question]["point"])
 
         return score
 
@@ -154,9 +154,9 @@ class Grader:
         for homework in self.homeworks:
             print "Hey ", homework.name + "!"
 
-            for answer in homework.answer_sheets:
+            for ans in homework.ans_sheets:
                 try:
-                    score = self._check_answers(answer)
+                    score = self._check_anss(ans)
                     homework.scores.append(score)
                 except:
                     print ">>> Some problems on ", homework.name +"!"
@@ -167,11 +167,11 @@ class Grader:
 
     def check_ambiguity(self, homework):
         ambiguity = False
-        if len(homework.answer_urls) > 1:
+        if len(homework.ans_urls) > 1:
             ambiguity = True
 
-        for answer_sheet in homework.answer_sheets:
-            if len(answer_sheet) != len(self.correct_answer):
+        for ans_sheet in homework.ans_sheets:
+            if len(ans_sheet) != len(self.correct_ans):
                 ambiguity = True
 
         return ambiguity

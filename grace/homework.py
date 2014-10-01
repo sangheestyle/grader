@@ -10,8 +10,8 @@ class Homework:
         self.submitted_at = submitted_at
         self.commits = commits
         self.files = files
-        self.answer_urls = []
-        self.answer_sheets = []
+        self.ans_urls = []
+        self.ans_sheets = []
         self.expected_score = 0
         self.scores = []
         self.ambiguity = False
@@ -31,11 +31,11 @@ class Homework:
         regex = r"^#{1,3} [Nn]ame$"
         rx = re.compile(regex)
 
-        for answer_sheet in self.answer_sheets:
-            for index in range(len(answer_sheet)):
-                result = rx.search(answer_sheet[index]['head_contents'])
+        for ans_sheet in self.ans_sheets:
+            for index in range(len(ans_sheet)):
+                result = rx.search(ans_sheet[index]['head'])
                 if result is not None:
-                    names.append(answer_sheet[index]['main_contents'])
+                    names.append(ans_sheet[index]['main'])
 
         try:
             self.name = max(names)
@@ -50,14 +50,14 @@ class Homework:
         regex_point_sentence = r"^#{1,3} How many points .*"
         rx_point_sentence = re.compile(regex_point_sentence)
 
-        for answer_sheet in self.answer_sheets:
-            for index in range(len(answer_sheet)):
-                head_contents = answer_sheet[index]['head_contents']
+        for ans_sheet in self.ans_sheets:
+            for index in range(len(ans_sheet)):
+                head = ans_sheet[index]['head']
                 # for debugging purpose
-                # print answer_sheet[index]['head_contents']
+                # print ans_sheet[index]['head']
 
-                if rx_point_sentence.search(head_contents) is not None:
-                    result = rx_score.search(answer_sheet[index]['main_contents'])
+                if rx_point_sentence.search(head) is not None:
+                    result = rx_score.search(ans_sheet[index]['main'])
 
                     if result is not None:
                         scores.append(int(result.group(1)))
@@ -85,16 +85,16 @@ class Homework:
             return resp
 
     def set_urls(self):
-        for idx, answer_sheet in enumerate(self.answer_sheets):
-            for index in range(len(answer_sheet)):
-                url = self._extract_url(answer_sheet[index]['main_contents'])
+        for idx, ans_sheet in enumerate(self.ans_sheets):
+            for index in range(len(ans_sheet)):
+                url = self._extract_url(ans_sheet[index]['main'])
                 if url is not None:
-                    self.answer_sheets[idx][index].update({'url':url})
+                    self.ans_sheets[idx][index].update({'url':url})
                     resp = self._open_url(url)
                     if resp == 404:
-                        self.answer_sheets[idx][index].update({'valid_url':False})
+                        self.ans_sheets[idx][index].update({'valid_url':False})
                     else:
-                        self.answer_sheets[idx][index].update({'valid_url':True})
-                        self.answer_sheets[idx][index].update({'url_contents':
+                        self.ans_sheets[idx][index].update({'valid_url':True})
+                        self.ans_sheets[idx][index].update({'url_contents':
                                                                 resp.read()})
 

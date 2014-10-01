@@ -18,7 +18,7 @@ user = "CSCI-4830-002-2014"
 project = raw_input("Enter github project: ")
 
 grace.login(username, password)
-grace.retrieve_correct_answer(user, project)
+grace.retrieve_correct_ans(user, project)
 grace.retrieve_homeworks(user, project)
 grace.grading()
 grace.report()

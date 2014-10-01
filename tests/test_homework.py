@@ -11,12 +11,12 @@ class TestSequenceFunctions(unittest.TestCase):
         files = None
 
         self.hw = Homework(email, login, title, submitted_at, commits, files)
-        self.hw.answer_sheets = [{0:{'main_contents': 'First Last',
-                                     'head_contents': '# Name'},
-                                  1:{'main_contents': "90/100(Make your",
-                                     'head_contents': '# How many points have'},
-                                  2:{'main_contents': 'http://imgur.com/mC2uo',
-                                     'head_contents': '## Checkpoint 1 (10 points)'}}
+        self.hw.ans_sheets = [{0:{'main': 'First Last',
+                                     'head': '# Name'},
+                                  1:{'main': "90/100(Make your",
+                                     'head': '# How many points have'},
+                                  2:{'main': 'http://imgur.com/mC2uo',
+                                     'head': '## Checkpoint 1 (10 points)'}}
                                 ]
 
     def test_set_name(self):
@@ -34,7 +34,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_set_urls(self):
         self.hw.set_urls()
-        self.assertEqual(self.hw.answer_sheets[0][2]['url'], \
+        self.assertEqual(self.hw.ans_sheets[0][2]['url'], \
                          'http://imgur.com/mC2uo')
 
     def test_check_url(self):
