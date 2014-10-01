@@ -37,6 +37,14 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(self.hw.answer_sheets[0][2]['url'], \
                          'http://imgur.com/mC2uo')
 
+    def test_check_url(self):
+        valid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/"\
+                     "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py"
+        invalid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/"\
+                       "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py.py"
+        self.assertNotEqual(self.hw._open_url(valid_url), 404)
+        self.assertEqual(self.hw._open_url(invalid_url), 404)
+
 
 if __name__=='__main__':
     unittest.main()

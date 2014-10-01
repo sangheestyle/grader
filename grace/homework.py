@@ -1,4 +1,5 @@
 import re
+import urllib2
 
 class Homework:
     def __init__(self, email, login, title, submitted_at, commits, files):
@@ -74,9 +75,26 @@ class Homework:
 
         return url
 
+    def _open_url(self, url):
+        req = urllib2.Request(url)
+        try:
+            resp = urllib2.urlopen(req)
+        except urllib2.URLError, e:
+            return e.code
+        else:
+            return resp
+
     def set_urls(self):
         for idx, answer_sheet in enumerate(self.answer_sheets):
             for index in range(len(answer_sheet)):
                 url = self._extract_url(answer_sheet[index]['main_contents'])
                 if url is not None:
                     self.answer_sheets[idx][index].update({'url':url})
+                    resp = self._open_url(url)
+                    if resp == 404:
+                        self.answer_sheets[idx][index].update({'valid_url':False})
+                    else:
+                        self.answer_sheets[idx][index].update({'valid_url':True})
+                        self.answer_sheets[idx][index].update({'url_contents':
+                                                                resp.read()})
+
