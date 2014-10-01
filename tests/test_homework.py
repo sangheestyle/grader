@@ -27,6 +27,11 @@ class TestSequenceFunctions(unittest.TestCase):
         self.hw.set_expected_score()
         self.assertEqual(self.hw.expected_score, 90)
 
+    def test_extract_url(self):
+        url = "http://abc.com/git/readme.com"
+        raw_text = "fad894y89 457437651er7" + url + " http:/d'39"
+        self.assertEqual(self.hw._extract_url(raw_text), url)
+
 
 if __name__=='__main__':
     unittest.main()

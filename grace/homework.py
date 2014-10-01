@@ -62,3 +62,9 @@ class Homework:
                         scores.append(int(result.group(1)))
 
         self.expected_score = max(scores)
+
+    def _extract_url(self, text):
+        """
+        assume one url per one line
+        """
+        return re.findall(r'(https?://\S+)', text)[0]
