@@ -11,6 +11,7 @@ class Grader:
     def __init__(self, name):
         self.name = name
         self.github_instance = None
+        self.project = None
         self.correct_ans = ''
         self.homeworks = []
 
@@ -24,6 +25,9 @@ class Grader:
         "many points have you",
         "What is the most difficult part",
         "many hours have you spent"]
+
+    def set_project(self, project):
+        self.project = project
 
     def login(self, username, password):
         print ">>> Hello " + username +"! " + "I am " + self.name + "!"
@@ -64,8 +68,14 @@ class Grader:
             main = raw_ans_form[item]["main"].rstrip()
             head = raw_ans_form[item]["head"].rstrip()
 
+            project_num = re.findall("\d+", self.project)[0]
+            if project_num > 4:
+                substrings = self.substr_not_question[1:]
+            else:
+                substrings = self.substr_not_question
+
             if (main is not '') and not any(substring in head \
-                                    for substring in self.substr_not_question):
+                                            for substring in substrings):
                 is_question = True
 
             raw_ans_form[item].update({"is_question": is_question})
