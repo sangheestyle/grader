@@ -137,6 +137,7 @@ class Grader:
 
             homework.set_name()
             homework.set_expected_score()
+            homework.set_urls()
 
     def _similar(self, text_a, text_b, trasholder=0.991):
         text_a = text_a.strip().lower()
@@ -156,7 +157,13 @@ class Grader:
                 if self._similar(cor_ans, home_ans) is True:
                     continue
                 else:
-                    score += int(self.correct_ans[question]["point"])
+                    if "valid_url" in homework:
+                        if homework["valid_url"]:
+                            score += int(self.correct_ans[question]["point"])
+                        else:
+                            continue
+                    else:
+                        score += int(self.correct_ans[question]["point"])
 
         return score
 

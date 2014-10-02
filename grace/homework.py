@@ -93,6 +93,12 @@ class Homework:
                     resp = self._open_url(url)
                     if resp == 404:
                         self.ans_sheets[idx][index].update({'valid_url':False})
+                    elif resp == 403:
+                        """
+                        Forbidden
+                        """
+                        self.ans_sheets[idx][index].update({'valid_url':True})
+                        self.ans_sheets[idx][index].update({'url_contents':resp})
                     else:
                         self.ans_sheets[idx][index].update({'valid_url':True})
                         self.ans_sheets[idx][index].update({'url_contents':
