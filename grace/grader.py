@@ -14,6 +14,17 @@ class Grader:
         self.correct_ans = ''
         self.homeworks = []
 
+        """
+        You need to specify what kind of string in header is not question
+        including those substring.
+        """
+        self.substr_not_question = [
+        "Show and tell",
+        "Name",
+        "many points have you",
+        "What is the most difficult part",
+        "many hours have you spent"]
+
     def login(self, username, password):
         print ">>> Hello " + username +"! " + "I am " + self.name + "!"
         self.github_instance = Github(username, password)
@@ -50,22 +61,12 @@ class Grader:
         for index, item in enumerate(raw_ans_form):
             is_question = False
             point = 0
-            main = raw_ans_form[item]["main"]
-            head = raw_ans_form[item]["head"]
+            main = raw_ans_form[item]["main"].rstrip()
+            head = raw_ans_form[item]["head"].rstrip()
 
-            """
-            Add cases which are not in each header string if it is question
-
-            e.g, if 'many hours have you spent' is in the head
-                 it means the head is not question
-            """
-            if (main.strip() is not '') \
-                and ("Name" not in head) \
-                and ("many points have you" not in head) \
-                and ("Show and tell" not in head) \
-                and ("What is the most difficult part" not in head) \
-                and ("many hours have you spent" not in head):
-                    is_question = True
+            if (main is not '') and not any(substring in head \
+                                    for substring in self.substr_not_question):
+                is_question = True
 
             raw_ans_form[item].update({"is_question": is_question})
 
