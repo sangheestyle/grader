@@ -100,7 +100,13 @@ class Homework:
                         self.ans_sheets[idx][index].update({'valid_url':True})
                         self.ans_sheets[idx][index].update({'url_contents':resp})
                     else:
-                        self.ans_sheets[idx][index].update({'valid_url':True})
-                        self.ans_sheets[idx][index].update({'url_contents':
+                        try:
+                            self.ans_sheets[idx][index].update({'valid_url':True})
+                            self.ans_sheets[idx][index].update({'url_contents':
                                                                 resp.read()})
+                        except:
+                            self.ans_sheets[idx][index].update({'valid_url':True})
+                            self.ans_sheets[idx][index].update({'url_contents':
+                                                                 resp})
+
 
