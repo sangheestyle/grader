@@ -146,19 +146,46 @@ class Grader:
 
         return seq.ratio() > trasholder
 
-    def _check_anss(self, homework):
+    @staticmethod
+    def _correct_source_link(ans, hw):
+        """
+        Check the answer has source code link over than 1 line
+
+        :param ans: homework answer
+        :param hw: homework object for using files
+        :return: True if the number of code line is over than 1 line
+        """
+        regex = re.compile(r"\[(.*?)\](.*?)\((.*?)\)")
+        source_code_path = regex.findall(ans)[0][-1]
+        source_raw_url = [f.raw_url for f in hw.files
+                          if f.raw_url.endswith(source_code_path)]
+        if source_code_path != None and len(source_raw_url) > 0:
+            response = urllib2.urlopen(source_raw_url[0])
+            res_len = response.readlines()
+            if res_len > 0:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def _check_anss(self, ans, hw):
         score = 0
         for index, question in enumerate(self.correct_ans):
             if self.correct_ans[question]["is_question"] is True:
                 # for debugging
                 # print self.correct_ans[question]["head"]
                 cor_ans = self.correct_ans[question]["main"]
-                home_ans = homework[index]["main"]
+                home_ans = ans[index]["main"]
                 if self._similar(cor_ans, home_ans) is True:
-                    continue
+                    # Check the source link containing source code
+                    if self._correct_source_link(home_ans, hw):
+                        score += int(self.correct_ans[question]["point"])
+                    else:
+                        continue
                 else:
-                    if "valid_url" in homework:
-                        if homework["valid_url"]:
+                    if "valid_url" in ans:
+                        if ans["valid_url"]:
                             score += int(self.correct_ans[question]["point"])
                         else:
                             continue
@@ -171,17 +198,15 @@ class Grader:
         print ">>> Grading"
         for homework in self.homeworks:
             print "Hey ", homework.name + "!"
-
             for ans in homework.ans_sheets:
-                try:
-                    score = self._check_anss(ans)
+                if self.correct_ans.keys() == ans.keys():
+                    score = self._check_anss(ans, homework)
                     homework.scores.append(score)
-                except:
-                    print ">>> Some problems on ", homework.name +"!"
+                else:
+                    print ">>> KeyError, Check the number of answer: ", homework.name +"!"
 
             homework.set_final_scores()
             homework.ambiguity = self.check_ambiguity(homework)
-
 
     def check_ambiguity(self, homework):
         ambiguity = False
