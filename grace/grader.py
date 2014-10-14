@@ -4,6 +4,8 @@ import difflib
 from github import Github
 from homework import Homework
 
+# submission source types
+SRC_TYPES = (".js", ".json")
 
 def _correct_source_link(ans, hw):
     """
@@ -13,19 +15,24 @@ def _correct_source_link(ans, hw):
     :param hw: homework object for using files
     :return: True if the number of code line is over than 1 line
     """
+    result = False
     regex = re.compile(r"\[(.*?)\](.*?)\((.*?)\)")
-    source_code_path = regex.findall(ans)[0][-1]
-    source_raw_url = [f.raw_url for f in hw.files
-                      if f.raw_url.endswith(source_code_path)]
-    if source_code_path != None and len(source_raw_url) > 0:
-        response = urllib2.urlopen(source_raw_url[0])
-        res_len = response.readlines()
-        if res_len > 0:
-            return True
-        else:
-            return False
-    else:
-        return False
+    source_code_path = regex.findall(ans)
+    source_raw_url = set()
+    paths = set(p for path_pair in source_code_path for p in path_pair)
+    paths = [p for p in paths if p.endswith(SRC_TYPES)]
+    for f in hw.files:
+        for p in paths:
+            if f.raw_url.endswith(p):
+                source_raw_url.add(f.raw_url)
+
+    if (source_code_path is not None) and (len(source_raw_url) > 0):
+        for url in source_raw_url:
+            response = urllib2.urlopen(url)
+            res_len = response.readlines()
+            if res_len > 0:
+                result = True
+    return result
 
 
 def _similar(text_a, text_b, trasholder=0.991):
