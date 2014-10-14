@@ -6,8 +6,61 @@ from github import Github
 from homework import Homework
 
 
-class Grader:
+def _correct_source_link(ans, hw):
+    """
+    Check the answer has source code link over than 1 line
 
+    :param ans: homework answer
+    :param hw: homework object for using files
+    :return: True if the number of code line is over than 1 line
+    """
+    regex = re.compile(r"\[(.*?)\](.*?)\((.*?)\)")
+    source_code_path = regex.findall(ans)[0][-1]
+    source_raw_url = [f.raw_url for f in hw.files
+                      if f.raw_url.endswith(source_code_path)]
+    if source_code_path != None and len(source_raw_url) > 0:
+        response = urllib2.urlopen(source_raw_url[0])
+        res_len = response.readlines()
+        if res_len > 0:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def _similar(text_a, text_b, trasholder=0.991):
+    text_a = text_a.strip().lower()
+    text_b = text_b.strip().lower()
+    seq = difflib.SequenceMatcher(None, text_a, text_b)
+    return seq.ratio() > trasholder
+
+
+def md_to_ans_form(md):
+    ans_form = {}
+    head = None
+    main = ""
+    head_cnt = 0
+    for index, line in enumerate(md.readlines()):
+        line = line.rstrip()
+        if (line.startswith('#')) and (head is None):
+            # new head is started
+            head = line
+        elif (line.startswith('#')) and (head is not None):
+            # make new dict item
+            ans_form[head_cnt] = {"head": head, "main": main}
+            head = line
+            main = ""
+            head_cnt += 1
+        elif (not line.startswith('#')) and (head is None):
+            continue
+        else:
+            main += line
+    ans_form[head_cnt] = {"head": head, "main": main}
+    return ans_form
+
+
+class Grader:
     def __init__(self, name):
         self.name = name
         self.github_instance = None
@@ -20,46 +73,18 @@ class Grader:
         including those substring.
         """
         self.substr_not_question = [
-        "Show and tell",
-        "Name",
-        "many points have you",
-        "What is the most difficult part",
-        "many hours have you spent"]
+            "Show and tell",
+            "Name",
+            "many points have you",
+            "What is the most difficult part",
+            "many hours have you spent"]
 
     def set_project(self, project):
         self.project = project
 
     def login(self, username, password):
-        print ">>> Hello " + username +"! " + "I am " + self.name + "!"
+        print ">>> Hello " + username + "! " + "I am " + self.name + "!"
         self.github_instance = Github(username, password)
-
-    def md_to_ans_form(self, md):
-        ans_form = {}
-        head = None
-        main = ""
-        head_cnt = 0
-
-        for index, line in enumerate(md.readlines()):
-            line = line.rstrip()
-            if (line.startswith('#')) and (head is None):
-                # new head is started
-                head = line
-            elif (line.startswith('#')) and (head is not None):
-                # make new dict item
-                ans_form[head_cnt] = {"head": head,
-                                      "main": main}
-                head = line
-                main = ""
-                head_cnt += 1
-            elif (not line.startswith('#')) and (head is None):
-                continue
-            else:
-                main += line
-
-        ans_form[head_cnt] = {"head": head,
-                              "main": main}
-
-        return ans_form
 
     def parse_ans(self, raw_ans_form, def_point=5):
         for index, item in enumerate(raw_ans_form):
@@ -105,14 +130,13 @@ class Grader:
               "/" + branch + \
               "/" + filename
         response = urllib2.urlopen(url)
-        raw_ans_form = self.md_to_ans_form(response)
+        raw_ans_form = md_to_ans_form(response)
         self.correct_ans = self.parse_ans(raw_ans_form)
 
     def retrieve_homeworks(self, user, project):
         print ">>> Retrieving homeworks"
-        pulls = self.github_instance.get_user(user).\
-                get_repo(project).get_pulls()
-
+        pulls = self.github_instance.get_user(user). \
+            get_repo(project).get_pulls()
         for pull in pulls:
             hw = Homework(pull.user.email,
                           pull.user.login,
@@ -121,99 +145,61 @@ class Grader:
                           pull.get_commits(),
                           pull.get_files())
             self.homeworks.append(hw)
-
         regex = r".*challenge-week-[0-9]{1,2}/raw/[0-9a-z]{40}/[^/]+?.md$"
         rx = re.compile(regex)
-
-        for homework in self.homeworks:
-            for file in homework.files:
-                result = rx.search(file.raw_url)
-
+        for hw in self.homeworks:
+            for f in hw.files:
+                result = rx.search(f.raw_url)
                 if result is not None:
-                    homework.ans_urls.append(file.raw_url)
-                    response = urllib2.urlopen(file.raw_url)
-                    homework.ans_sheets.append(
-                            self.md_to_ans_form(response))
-
-            homework.set_name()
-            homework.set_expected_score()
-            homework.set_urls()
-
-    def _similar(self, text_a, text_b, trasholder=0.991):
-        text_a = text_a.strip().lower()
-        text_b = text_b.strip().lower()
-        seq = difflib.SequenceMatcher(None, text_a, text_b)
-
-        return seq.ratio() > trasholder
-
-    @staticmethod
-    def _correct_source_link(ans, hw):
-        """
-        Check the answer has source code link over than 1 line
-
-        :param ans: homework answer
-        :param hw: homework object for using files
-        :return: True if the number of code line is over than 1 line
-        """
-        regex = re.compile(r"\[(.*?)\](.*?)\((.*?)\)")
-        source_code_path = regex.findall(ans)[0][-1]
-        source_raw_url = [f.raw_url for f in hw.files
-                          if f.raw_url.endswith(source_code_path)]
-        if source_code_path != None and len(source_raw_url) > 0:
-            response = urllib2.urlopen(source_raw_url[0])
-            res_len = response.readlines()
-            if res_len > 0:
-                return True
-            else:
-                return False
-        else:
-            return False
+                    hw.ans_urls.append(f.raw_url)
+                    response = urllib2.urlopen(f.raw_url)
+                    hw.ans_sheets.append(md_to_ans_form(response))
+            hw.set_name()
+            hw.set_expected_score()
+            hw.set_urls()
 
     def _check_anss(self, ans, hw):
         score = 0
-        for index, question in enumerate(self.correct_ans):
-            if self.correct_ans[question]["is_question"] is True:
-                # for debugging
-                # print self.correct_ans[question]["head"]
-                cor_ans = self.correct_ans[question]["main"]
-                home_ans = ans[index]["main"]
-                if self._similar(cor_ans, home_ans) is True:
+        for i, q in enumerate(self.correct_ans):
+            if self.correct_ans[q]["is_question"] is True:
+                cor_ans = self.correct_ans[q]["main"]
+                home_ans = ans[i]["main"]
+                if _similar(cor_ans, home_ans) is True:
                     # Check the source link containing source code
-                    if self._correct_source_link(home_ans, hw):
-                        score += int(self.correct_ans[question]["point"])
+                    if _correct_source_link(home_ans, hw):
+                        score += int(self.correct_ans[q]["point"])
                     else:
                         continue
                 else:
                     if "valid_url" in ans:
                         if ans["valid_url"]:
-                            score += int(self.correct_ans[question]["point"])
+                            score += int(self.correct_ans[q]["point"])
                         else:
                             continue
                     else:
-                        score += int(self.correct_ans[question]["point"])
-
+                        score += int(self.correct_ans[q]["point"])
         return score
 
     def grading(self):
         print ">>> Grading"
-        for homework in self.homeworks:
-            print "Hey ", homework.name + "!"
-            for ans in homework.ans_sheets:
+        for hw in self.homeworks:
+            print "Hey ", hw.name + "!"
+            for ans in hw.ans_sheets:
                 if self.correct_ans.keys() == ans.keys():
-                    score = self._check_anss(ans, homework)
-                    homework.scores.append(score)
+                    score = self._check_anss(ans, hw)
+                    hw.scores.append(score)
                 else:
-                    print ">>> KeyError, Check the number of answer: ", homework.name +"!"
+                    print ">>> KeyError, Check the number of answer: ", hw.name + "!"
 
-            homework.set_final_scores()
-            homework.ambiguity = self.check_ambiguity(homework)
+            hw.set_final_scores()
+            hw.ambiguity = self.check_ambiguity(hw)
 
-    def check_ambiguity(self, homework):
+    def check_ambiguity(self, hw):
         ambiguity = False
-        if len(homework.ans_urls) > 1:
+        if len(hw.ans_urls) > 1:
             ambiguity = True
 
-        for ans_sheet in homework.ans_sheets:
+        for ans_sheet in hw.ans_sheets:
             if len(ans_sheet) != len(self.correct_ans):
                 ambiguity = True
 
@@ -224,9 +210,9 @@ class Grader:
 
     def report(self):
         print ">>> Reporting"
-        print "{0:20} {1:6} {2:6} {3:}".format(\
-                "name", "score", "expect", "ambiguous")
-        for homework in self.homeworks:
-            print "{0:20} {1:6d} {2:6d} {3:}".format(\
-                  homework.name, homework.final_score,
-                  homework.expected_score, homework.ambiguity)
+        print "{0:20} {1:6} {2:6} {3:}".format( \
+            "name", "score", "expect", "ambiguous")
+        for hw in self.homeworks:
+            print "{0:20} {1:6d} {2:6d} {3:}".format( \
+                hw.name, hw.final_score,
+                hw.expected_score, hw.ambiguity)
