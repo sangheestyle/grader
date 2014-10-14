@@ -1,4 +1,3 @@
-import getpass
 import urllib2
 import re
 import difflib
