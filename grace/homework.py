@@ -3,6 +3,34 @@ import requests
 from requests.exceptions import ConnectionError
 
 
+def extract_url(string):
+    """ Extract URL from given string
+
+    :param string:
+    :return: url
+    """
+    url = re.findall(r'(https?://\S+)', string)
+    if not url:
+        url = None
+    else:
+        url = url[0].replace(")", "")
+    return url
+
+
+def url_exists(url):
+    """ Check url is exists or not
+
+    :param url: url
+    :return: response code
+    """
+    try:
+        r = requests.head(url)
+        code = r.status_code
+    except ConnectionError, e:
+        code = 404
+    return code
+
+
 class Homework:
     def __init__(self, email, login, title, submitted_at, commits, files):
         self.name = None
@@ -66,32 +94,13 @@ class Homework:
 
         self.expected_score = max(scores)
 
-    def _extract_url(self, text):
-        """
-        assume one url per one line
-        """
-        url = re.findall(r'(https?://\S+)', text)
-        if not url:
-            url = None
-        else:
-            url = url[0].replace(")", "")
-        return url
-
-    def _open_url(self, url):
-        try:
-            r = requests.head(url)
-            code = r.status_code
-        except ConnectionError, e:
-            code = 404
-        return code
-
     def set_urls(self):
         for idx1, ans_sheet in enumerate(self.ans_sheets):
             for idx2 in range(len(ans_sheet)):
-                url = self._extract_url(ans_sheet[idx2]['main'])
+                url = extract_url(ans_sheet[idx2]['main'])
                 if url is not None:
                     self.ans_sheets[idx1][idx2].update({'url': url})
-                    r = self._open_url(url)
+                    r = url_exists(url)
                     if r == 404:
                         self.ans_sheets[idx1][idx2].update(
                             {'valid_url': False})
