@@ -68,11 +68,11 @@ class Homework:
         """
         assume one url per one line
         """
-        try:
-            url =re.findall(r'(https?://\S+)', text)[0]
-        except:
+        url = re.findall(r'(https?://\S+)', text)
+        if not url:
             url = None
-
+        else:
+            url = url[0].replace(")", "")
         return url
 
     def _open_url(self, url):
