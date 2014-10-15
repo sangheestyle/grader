@@ -1,5 +1,7 @@
 import re
-import urllib2
+import requests
+from requests.exceptions import ConnectionError
+
 
 class Homework:
     def __init__(self, email, login, title, submitted_at, commits, files):
@@ -76,13 +78,12 @@ class Homework:
         return url
 
     def _open_url(self, url):
-        req = urllib2.Request(url)
         try:
-            resp = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            return e.code
-        else:
-            return resp
+            r = requests.head(url)
+            code = r.status_code
+        except ConnectionError, e:
+            code = 404
+        return code
 
     def set_urls(self):
         for idx, ans_sheet in enumerate(self.ans_sheets):
@@ -93,20 +94,15 @@ class Homework:
                     resp = self._open_url(url)
                     if resp == 404:
                         self.ans_sheets[idx][index].update({'valid_url':False})
-                    elif resp == 403:
+                    else:
                         """
-                        Forbidden
+                        response codes:
+
+                        403: forbidden
+                        30x: server redirect
+                        200: OK
                         """
                         self.ans_sheets[idx][index].update({'valid_url':True})
-                        self.ans_sheets[idx][index].update({'url_contents':resp})
-                    else:
-                        try:
-                            self.ans_sheets[idx][index].update({'valid_url':True})
-                            self.ans_sheets[idx][index].update({'url_contents':
-                                                                resp.read()})
-                        except:
-                            self.ans_sheets[idx][index].update({'valid_url':True})
-                            self.ans_sheets[idx][index].update({'url_contents':
-                                                                 resp})
+                        self.ans_sheets[idx][index].update({'url_contents': resp})
 
 
