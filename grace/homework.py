@@ -86,14 +86,15 @@ class Homework:
         return code
 
     def set_urls(self):
-        for idx, ans_sheet in enumerate(self.ans_sheets):
-            for index in range(len(ans_sheet)):
-                url = self._extract_url(ans_sheet[index]['main'])
+        for idx1, ans_sheet in enumerate(self.ans_sheets):
+            for idx2 in range(len(ans_sheet)):
+                url = self._extract_url(ans_sheet[idx2]['main'])
                 if url is not None:
-                    self.ans_sheets[idx][index].update({'url':url})
-                    resp = self._open_url(url)
-                    if resp == 404:
-                        self.ans_sheets[idx][index].update({'valid_url':False})
+                    self.ans_sheets[idx1][idx2].update({'url': url})
+                    r = self._open_url(url)
+                    if r == 404:
+                        self.ans_sheets[idx1][idx2].update(
+                            {'valid_url': False})
                     else:
                         """
                         response codes:
@@ -102,7 +103,5 @@ class Homework:
                         30x: server redirect
                         200: OK
                         """
-                        self.ans_sheets[idx][index].update({'valid_url':True})
-                        self.ans_sheets[idx][index].update({'url_contents': resp})
-
-
+                        self.ans_sheets[idx1][idx2].update(
+                            {'valid_url': True})
