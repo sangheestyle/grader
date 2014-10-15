@@ -12,13 +12,12 @@ class TestSequenceFunctions(unittest.TestCase):
         files = None
 
         self.hw = Homework(email, login, title, submitted_at, commits, files)
-        self.hw.ans_sheets = [{0:{'main': 'First Last',
-                                     'head': '# Name'},
-                                  1:{'main': "90/100(Make your",
-                                     'head': '# How many points have'},
-                                  2:{'main': 'http://imgur.com/mC2uo',
-                                     'head': '## Checkpoint 1 (10 points)'}}
-                                ]
+        self.hw.ans_sheets = [{0: {'main': 'First Last',
+                                   'head': '# Name'},
+                               1: {'main': "90/100(Make your",
+                                   'head': '# How many points have'},
+                               2: {'main': 'http://imgur.com/mC2uo',
+                                   'head': '## Checkpoint 1 (10 points)'}}]
 
     def test_set_name(self):
         self.hw.set_name()
@@ -35,17 +34,17 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_set_urls(self):
         self.hw.set_urls()
-        self.assertEqual(self.hw.ans_sheets[0][2]['url'], \
+        self.assertEqual(self.hw.ans_sheets[0][2]['url'],
                          'http://imgur.com/mC2uo')
 
     def test_check_url(self):
-        valid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/"\
-                     "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py"
-        invalid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/"\
-                       "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py.py"
+        valid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/" \
+                    "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py"
+        invalid_url = r"https://raw.githubusercontent.com/sangheestyle/grader/" \
+                      "a2c95a5e952a7f9f4d222c134bf76c83c9611f67/tests.py.py"
         self.assertNotEqual(url_exists(valid_url), 404)
         self.assertEqual(url_exists(invalid_url), 404)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
