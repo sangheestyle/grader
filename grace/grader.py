@@ -1,6 +1,8 @@
 import urllib2
 import re
 import difflib
+
+import pandas as pd
 from github import Github
 from homework import Homework
 
@@ -191,6 +193,11 @@ class Grader:
         for hw in self.homeworks:
             print "Hey ", hw.name + "!"
             for ans in hw.ans_sheets:
+                print "---"
+                print self.correct_ans.keys()
+                print ans.keys()
+                if len(ans.keys()) == 18:
+                    print ans
                 if self.correct_ans.keys() == ans.keys():
                     score = self._check_anss(ans, hw)
                     hw.scores.append(score)
@@ -222,3 +229,6 @@ class Grader:
             print "{0:20} {1:6d} {2:6d} {3:}".format( \
                 hw.name, hw.final_score,
                 hw.expected_score, hw.ambiguity)
+
+    def get_homeworks(self):
+        return self.homeworks

@@ -3,6 +3,7 @@ import argparse
 import getpass
 from grace.grader import Grader
 from grace.homework import Homework
+from grace.grade_sheet import GradeSheet
 
 """
 Specifically speaking, this grader can be grading on
@@ -23,14 +24,17 @@ parser.add_argument('--begin_n', help="Start week",
                     type=int, required=True)
 parser.add_argument('--end_n', help="End week",
                     type=int, required=True)
+parser.add_argument('--o', help="Output file path",
+                    type=str, required=True)
 args = parser.parse_args()
 
 username = args.id
 password = getpass.getpass("Enter github password: ")
 user = args.user
-
+gs = GradeSheet()
 for week_number in range(args.begin_n, args.end_n+1):
     project = args.project_prefix + str(week_number)
+    print "===", project
     grace = Grader("Grace")
     grace.set_project(project)
     grace.login(username, password)
@@ -38,3 +42,5 @@ for week_number in range(args.begin_n, args.end_n+1):
     grace.retrieve_homeworks(user, project)
     grace.grading()
     grace.report()
+    gs.receive(int(project[-1]), grace.get_homeworks())
+gs.to_pickle(args.o)
