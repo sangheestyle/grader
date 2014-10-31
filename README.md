@@ -11,5 +11,5 @@ $ pip install -r requirements.txt
 
 You may need to do following to get the result.
 ```
-$ $ time python grading.py --id sangheestyle --begin_n 1 --end_n 9 --o grade_sheet1-9.pkl
+$ python grading.py --id sangheestyle --begin_n 1 --end_n 9 --o grade_sheet1-9.pkl
 ```
