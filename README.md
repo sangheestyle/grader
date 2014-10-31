@@ -11,29 +11,5 @@ $ pip install -r requirements.txt
 
 You may need to do following to get the result.
 ```
-$ python grader.py 
-Enter github ID: sangheestyle
-Enter github password: 
-Enter github project: challenge-week-1
+$ python grading.py --id sangheestyle --begin_n 1 --end_n 9 --o grade_sheet1-9.pkl
 ```
-
-And, you will get the result like the following..
-```
-JoshFerge 100 False
-ianks 100 False
-develra 100 False
-indiesquidge 100 False
-msg425 100 False
-LoganBates 100 False
-peymanmortazavi 100 False
-Irfann1 100 False
-thefyk 100 False
-dawsonbotsford 100 False
-jakecharland 100 False
-BrianNewsom 100 False
-antsankov 100 False
-cwitty1919 100 False
-dare599z 100 False
-```
-
-If you find any 'True' in the result, you should check the homework submitted by the github login ID.
