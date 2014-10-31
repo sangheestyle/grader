@@ -83,9 +83,10 @@ class Grader:
         self.substr_not_question = [
             "Show and tell",
             "Name",
-            "many points have you",
-            "What is the most difficult part",
-            "many hours have you spent"]
+            "How many points have you earned",
+            "What is the most difficult part about this week's challenge",
+            "How many hours have you spent on this",
+            "When did you first start working on this week's learning challenges"]
 
     def set_project(self, project):
         self.project = project
@@ -193,9 +194,6 @@ class Grader:
         for hw in self.homeworks:
             print "Hey ", hw.name + "!"
             for ans in hw.ans_sheets:
-                print "---"
-                print self.correct_ans.keys()
-                print ans.keys()
                 if len(ans.keys()) == 18:
                     print ans
                 if self.correct_ans.keys() == ans.keys():
