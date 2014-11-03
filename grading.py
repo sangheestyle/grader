@@ -43,4 +43,5 @@ for week_number in range(args.begin_n, args.end_n+1):
     grace.grading()
     grace.report()
     gs.receive(int(project[-1]), grace.get_homeworks())
-gs.to_pickle(args.o)
+gs.sync_name_login()
+gs.to_excel('1-9.xls')

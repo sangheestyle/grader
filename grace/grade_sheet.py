@@ -65,10 +65,3 @@ class GradeSheet:
         for week in self._grade:
             for entry in self._grade[week]:
                 entry['name'] = login_name_map[entry['login']]
-
-
-if __name__=="__main__":
-    a = GradeSheet()
-    a.read_pickle('../scored/grade_sheet1-9.pkl')
-    a.sync_name_login()
-    a.to_excel('1-9b.xls')
