@@ -36,7 +36,7 @@ class GradeSheet:
             logins = []
             scores = []
             for entry in self._grade[week]:
-                logins.append(entry['login'])
+                logins.append(entry['name'])
                 expected = entry['expected']
                 score = entry['score']
                 scores.append(max(expected, score))
@@ -44,8 +44,31 @@ class GradeSheet:
             base_df = pd.concat([base_df, week_sheet])
         return base_df
 
+    def sync_name_login(self):
+        """
+        Some people sometimes did not write their name on weekly homework.
+        So, need to set their name based on the name on the other weekly homework.
+        """
+        login_name = defaultdict(set)
+        for week in self._grade:
+            for entry in self._grade[week]:
+                login_name[entry['login']].add(entry['name'])
+
+        login_name_map = {}
+        for login in login_name:
+            if len(login_name[login]) > 1:
+                login_name_map[login] = min([name for name in login_name[login]
+                                         if name != login], key=len)
+            else:
+                login_name_map[login] = list(login_name[login])[0]
+
+        for week in self._grade:
+            for entry in self._grade[week]:
+                entry['name'] = login_name_map[entry['login']]
+
 
 if __name__=="__main__":
     a = GradeSheet()
     a.read_pickle('../scored/grade_sheet1-9.pkl')
-    a.to_excel('1-9.xls')
+    a.sync_name_login()
+    a.to_excel('1-9b.xls')
