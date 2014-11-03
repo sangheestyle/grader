@@ -1,7 +1,6 @@
 import pickle
 from collections import defaultdict
 
-
 class GradeSheet:
     def __init__(self):
         self._grade = defaultdict(list)
@@ -19,3 +18,7 @@ class GradeSheet:
     def to_pickle(self, file_name):
         with open(file_name, "wb") as fp:
             pickle.dump(self._grade, fp)
+
+    def read_pickle(self, file_name):
+        with open(file_name, "rb") as fp:
+            self._grade = pickle.load(fp)
