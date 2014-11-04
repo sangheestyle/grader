@@ -25,11 +25,16 @@ class GradeSheet:
         with open(file_name, "rb") as fp:
             self._grade = pickle.load(fp)
 
-    def to_excel(self, file_name):
-        brief_df = self.get_brief()
+    def to_excel(self, file_name, method="expected"):
+        brief_df = self.get_brief(method)
         brief_df.to_excel(file_name)
 
-    def get_brief(self):
+    def get_brief(self, method="expected"):
+        """
+        method:
+            expected: get max between expected and scored
+            score: get scored only
+        """
         base_df = pd.DataFrame()
         for week in self._grade:
             index = week
@@ -39,7 +44,23 @@ class GradeSheet:
                 logins.append(entry['name'])
                 expected = entry['expected']
                 score = entry['score']
-                scores.append(max(expected, score))
+                if method == "expected":
+                    scores.append(max(expected, score))
+                elif method == "score":
+                    scores.append(score)
+                elif method == "mixed":
+                    if expected == score:
+                        scores.append(score)
+                    else:
+                        diff = abs(score-expected)
+                        mark = str(score)+"/"+str(expected)+":"+str(diff)
+                        if score > expected:
+                            mark = mark + "S"
+                        else:
+                            mark = mark + "E"
+                        scores.append(mark)
+                else:
+                    assert "Don't have methods"
             week_sheet = pd.DataFrame([scores], columns=logins, index=[index])
             base_df = pd.concat([base_df, week_sheet])
         return base_df

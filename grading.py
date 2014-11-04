@@ -26,22 +26,32 @@ parser.add_argument('--end_n', help="End week",
                     type=int, required=True)
 parser.add_argument('--o', help="Output file path",
                     type=str, required=True)
+parser.add_argument('--pkl', help="From pickled data",
+                    type=str)
+parser.add_argument('--tm', help="Method for saving grade sheet",
+                    type=str)
 args = parser.parse_args()
 
-username = args.id
-password = getpass.getpass("Enter github password: ")
-user = args.user
-gs = GradeSheet()
-for week_number in range(args.begin_n, args.end_n+1):
-    project = args.project_prefix + str(week_number)
-    print "===", project
-    grace = Grader("Grace")
-    grace.set_project(project)
-    grace.login(username, password)
-    grace.retrieve_correct_ans(user, project)
-    grace.retrieve_homeworks(user, project)
-    grace.grading()
-    grace.report()
-    gs.receive(int(project[-1]), grace.get_homeworks())
-gs.sync_name_login()
-gs.to_excel('1-9.xls')
+if args.pkl is not None:
+    gs = GradeSheet()
+    gs.read_pickle(args.pkl)
+    gs.sync_name_login()
+    gs.to_excel(args.o, args.tm)
+else:
+    username = args.id
+    password = getpass.getpass("Enter github password: ")
+    user = args.user
+    gs = GradeSheet()
+    for week_number in range(args.begin_n, args.end_n+1):
+        project = args.project_prefix + str(week_number)
+        print "===", project
+        grace = Grader("Grace")
+        grace.set_project(project)
+        grace.login(username, password)
+        grace.retrieve_correct_ans(user, project)
+        grace.retrieve_homeworks(user, project)
+        grace.grading()
+        grace.report()
+        gs.receive(int(project[-1]), grace.get_homeworks())
+    gs.sync_name_login()
+    gs.to_excel(args.o, args.tm)
